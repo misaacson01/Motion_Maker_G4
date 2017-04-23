@@ -22,7 +22,7 @@ function varargout = more_options(varargin)
 
 % Edit the above text to modify the response to help more_options
 
-% Last Modified by GUIDE v2.5 22-Feb-2017 16:02:57
+% Last Modified by GUIDE v2.5 23-Apr-2017 11:06:12
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -60,10 +60,11 @@ handles.gui1tag = findobj('Tag','Motion_Maker_G4_gui');
 sdata = getappdata(handles.gui1tag,'sdata');
 
 set(handles.popupmenu2, 'Value', ceil(sdata.aa_samples/8));
-set(handles.checkbox3, 'Value', sdata.aa_poles); 
 set(handles.edit1, 'String', num2str(sdata.phase_shift));
 set(handles.checkbox1, 'Value', sdata.back_frame);
 set(handles.checkbox2, 'Value', sdata.flip_right);
+set(handles.checkbox3, 'Value', sdata.aa_poles); 
+set(handles.checkbox4, 'Value', sdata.snap_dots); 
 
 % Update handles structure
 guidata(hObject, handles);
@@ -178,10 +179,11 @@ function pushbutton1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 popup_strings = get(handles.popupmenu2, 'String');
 sdata.aa_samples = str2double(popup_strings{get(handles.popupmenu2, 'Value')});
-sdata.aa_poles = get(handles.checkbox3, 'Value'); 
 sdata.phase_shift = round(str2double(get(handles.edit1, 'String')));
 sdata.back_frame = get(handles.checkbox1, 'Value');
 sdata.flip_right = get(handles.checkbox2, 'Value');
+sdata.aa_poles = get(handles.checkbox3, 'Value'); 
+sdata.snap_dots = get(handles.checkbox4, 'Value'); 
 
 setappdata(handles.gui1tag,'sdata',sdata);
 
@@ -195,3 +197,12 @@ function checkbox3_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox3
+
+
+% --- Executes on button press in checkbox4.
+function checkbox4_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox4

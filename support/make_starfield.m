@@ -18,8 +18,8 @@ function [Pats, num_frames, true_step_size] = make_starfield(param, arena_x, are
 % param.num_dots: number of random dots generated in arena space
 % param.dot_radius: radius of each dot
 % param.dot_size: 'static' or 'distance-relative' (where closer dots appear larger)
-% param.view_radius: distance dots can be seen
 % param.dot_occ: how occluding dots are handled ('closest', 'sum', or 'mean')
+% param.snap_dots: if apparent dot locations should be rounded to the nearest pixel (1 if yes)
 % param.aa_samples: # of samples taken to calculate a single pixel's brightness
 % 
 % outputs:
@@ -27,6 +27,8 @@ function [Pats, num_frames, true_step_size] = make_starfield(param, arena_x, are
 % num_frames: # of frames in the Pats variable (3rd dimension in Pats)
 % true_step_size: recalculated value of step size (in order to divide evenly into motion range)
 
+
+p_rad = param.p_rad; %take out of structure for readability
 
 %% calculate arena coordinates needed to produce for desired pattern
 if strncmpi(param.pattern_fov,'l',1)==1
@@ -47,32 +49,33 @@ end
 
 %% calculate random starting coordinates of dots
 num_dots = param.num_dots;
-view_rad = param.view_radius;
+view_rad = 1; %radius of sphere in which dots can be seen
 dots_x = (rand(num_dots, 1)*2 - 1)*view_rad;
 dots_y = (rand(num_dots, 1)*2 - 1)*view_rad;
 dots_z = (rand(num_dots, 1)*2 - 1)*view_rad;
 [~, ~, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
 
-% recalculate coordinates of dots that overlap the arena center   
+% recalculate coordinates of dots that overlap the arena center  
+actual_dot_radius = tan(param.dot_radius);
 if strncmpi(param.motion_type,'t',1)
     dots_pole_dist = hypot(dots_x, dots_y);
-    idx = dots_pole_dist<=param.dot_radius;
+    idx = dots_pole_dist<=actual_dot_radius;
     while any(idx)
         dots_x(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
         dots_y(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
         dots_pole_dist(idx) = hypot(dots_x(idx), dots_y(idx));
-        idx = dots_pole_dist<=param.dot_radius;
+        idx = dots_pole_dist<=actual_dot_radius;
     end
     [dots_phi, dots_theta, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
     
 else
-    idx = dots_rho<param.dot_radius;
+    idx = dots_rho<actual_dot_radius;
     while any(idx)
         dots_x(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
         dots_y(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
         dots_z(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
         [~, ~, dots_rho(idx)] = cart2sphere(dots_x(idx), dots_y(idx), dots_z(idx));
-        idx = dots_rho<param.dot_radius;
+        idx = dots_rho<actual_dot_radius;
     end
     idx = dots_rho>=view_rad;
     dots_x(idx) = [];
@@ -152,7 +155,7 @@ check_rotations = [rotations(1) rotations(2)+param.arena_pitch rotations(3)];
 
 %% calculate apparent radius (solid angle) of each dot
 if strncmpi(param.dot_size,'d',1) %closer dots appear larger
-    dots_rad = atan(param.dot_radius./dots_rho); 
+    dots_rad = atan(actual_dot_radius./dots_rho); 
 else %all dots appear the same size (as if all dots are on surface of unit sphere)
     dots_rad = param.dot_radius*ones(size(dots_rho));
 end
@@ -160,17 +163,40 @@ end
     
 %% find dots that will fall within arena coordinates
 %valid dots fall within arena fov and within view radius
+if param.snap_dots
+vdot_idx = cdots_theta<max(max(cpat_theta))+p_rad & ...
+                cdots_theta>min(min(cpat_theta))-p_rad & ...
+                cdots_phi<max(max(cpat_phi))+p_rad & ...
+                cdots_phi>min(min(cpat_phi))-p_rad & ...
+                cdots_rho<view_rad+dots_rad;
+else
 vdot_idx = cdots_theta<max(max(cpat_theta))+dots_rad & ...
                 cdots_theta>min(min(cpat_theta))-dots_rad & ...
                 cdots_phi<max(max(cpat_phi))+dots_rad & ...
                 cdots_phi>min(min(cpat_phi))-dots_rad & ...
                 cdots_rho<view_rad+dots_rad;
+end
 num_vdots = sum(vdot_idx);
 
 
 %% map valid dots to surface of unit sphere (rho=1)
 [sdots_x, sdots_y, sdots_z] = sphere2cart(dots_phi(vdot_idx), dots_theta(vdot_idx)); 
 
+
+%% to snap dots to nearest pixel
+if param.snap_dots
+    for d = 1:num_vdots
+        dx = abs(sdots_x(d) - pat_x);
+        dy = abs(sdots_y(d) - pat_y);
+        dz = abs(sdots_z(d) - pat_z);
+        vpix_inds = find(dx<2*p_rad & dy<2*p_rad & dz<2*p_rad);
+        v_rads = acos((2-(dx(vpix_inds).^2 + dy(vpix_inds).^2 + dz(vpix_inds).^2))/2);
+        [~, min_ind] = min(v_rads);
+        sdots_x(d) = pat_x(vpix_inds(min_ind));
+        sdots_y(d) = pat_y(vpix_inds(min_ind));
+        sdots_z(d) = pat_z(vpix_inds(min_ind));
+    end
+end
 
 %% find pixels that are close to each valid dot
 %convert pattern and dot matrices to arrays (valid dots in 3rd dim) and
@@ -180,7 +206,6 @@ dy = abs(permute(repmat(sdots_y,[1 size(pat_x)]),[2 3 1]) - repmat(pat_y,[1 1 nu
 dz = abs(permute(repmat(sdots_z,[1 size(pat_x)]),[2 3 1]) - repmat(pat_z,[1 1 num_vdots]));
 
 %valid pixels: close to a dot in all 3 dimensions individually
-p_rad = param.p_rad;
 dots_rad = permute(repmat(dots_rad(vdot_idx),[1 size(pat_x)]),[2 3 1]);
 vpix_inds = find(dx<dots_rad+p_rad & dy<dots_rad+p_rad & dz<dots_rad+p_rad);
 
@@ -228,6 +253,8 @@ elseif strncmpi(param.dot_occ,'c',1) %only shows closest dot (edge pixels will b
     [~, order] = sort(dots_rho(vdot_idx)); 
     %order = flipud(order); %to sort by farthest
     fullPats = fullPats(:,:,order);
+    
+    %show cum dot brightness
     frac_array = frac_array(:,:,order);
     
     %find indices of closest dots for each pixel (can see past edge pixels, to an extent)
@@ -281,6 +308,5 @@ end
 Pats(isnan(Pats)) = 0;
 Pats = Pats + param.levels(2);
 Pats(Pats>(2^param.gs_val - 1)) = 2^param.gs_val - 1;
-
 
 end
