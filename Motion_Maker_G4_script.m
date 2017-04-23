@@ -22,7 +22,7 @@ param.dot_radius = deg2rad(1.25); %radius of dots (in radians) {for starfield}
 param.dot_size = 'static'; %'static' or 'distance-relative' {for starfield}
 param.dot_occ = 'closest'; %how occluding dots are drawn ('closest', 'sum', or 'mean') {for starfield}
 param.dot_level = 0; %0 = dot brightness set to 1st level; 1 and 2 = random brightness (0-1st; 0 or 1st) {for starfield}
-param.view_radius = 1; %distance from center that dots can be seen {for starfield}
+param.snap_dots = 0; %1 if apparent dot locations should be rounded to the nearest pixel {for starfield}
 param.sa_mask = [0 0 pi 0]; %location, size, and direction of solid angle mask [longitude, lattitude, solid_angle, out/in]
 param.long_lat_mask = [-pi pi -pi/2 pi/2 0]; %coordinates of lattitude/longitude mask [min-long, max-long, min-lat, max-lattitude, out/in]
 param.aa_samples = 15; %# of samples taken to calculate the brightness of each pixel (1 or 15 suggested)

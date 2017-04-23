@@ -47,6 +47,10 @@ end
 if param.duty_cycle<0 || param.duty_cycle > 100
     error('duty_cycle must be value between 0-100');
 end
+if tan(param.dot_radius)>0.95
+    error(['actual dot radius (' num2str(tan(param.dot_radius)) ') is too large to ' ...
+        'reliably fit within the view radius and not overlap with the arena center'])
+end
 
 %% calculate arena coordinates
 %get starting arena parameters

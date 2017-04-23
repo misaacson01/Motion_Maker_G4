@@ -7,7 +7,7 @@ function varargout = Motion_Maker_G4_gui(varargin)
 %      the existing singleton*.
 %
 %      Motion_Maker_G4_gui('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in Motion_Maker_G4_gui.M with the given input arguments.
+%      function named CALLBACK in Motiont_Maker_G4_gui.M with the given input arguments.
 %
 %      Motion_Maker_G4_gui('Property','Value',...) creates a new Motion_Maker_G4_gui or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
@@ -59,6 +59,7 @@ sdata.aa_poles = 1;
 sdata.phase_shift = 0;
 sdata.back_frame = 0;
 sdata.flip_right = 0;
+sdata.snap_dots = 0;
 s2data.enable = [0 0];
 s2data.sa_mask = [0 0 pi 0];
 s2data.long_lat_mask = [-pi pi -pi/2 pi/2 0];
@@ -117,7 +118,6 @@ popup_strings = get(handles.popupmenu9, 'String');
 handles.param.dot_size = popup_strings{get(handles.popupmenu9, 'Value')};
 popup_strings = get(handles.popupmenu8, 'String');
 handles.param.dot_occ = popup_strings{get(handles.popupmenu8, 'Value')};
-handles.param.view_radius = str2double(get(handles.edit19, 'String'));
 popup_strings = get(handles.popupmenu2, 'String');
 handles.param.motion_type = popup_strings{get(handles.popupmenu2, 'Value')};
 popup_strings = get(handles.popupmenu5, 'String');
@@ -145,6 +145,7 @@ handles.param.aa_poles = sdata.aa_poles;
 handles.param.phase_shift = sdata.phase_shift;
 handles.param.back_frame = sdata.back_frame;
 handles.param.flip_right = sdata.flip_right;
+handles.param.snap_dots = sdata.snap_dots;
 
 %get mask options
 if strncmpi(handles.param.pattern_fov,'f',1)
@@ -299,12 +300,10 @@ set(handles.edit3,'visible',strings{2})
 set(handles.text28,'visible',strings{3})
 set(handles.text29,'visible',strings{3})
 set(handles.text30,'visible',strings{3})
-set(handles.text31,'visible',strings{3})
 set(handles.text32,'visible',strings{3})
 set(handles.text36,'visible',strings{3})
 set(handles.edit17,'visible',strings{3})
 set(handles.edit18,'visible',strings{3})
-set(handles.edit19,'visible',strings{3})
 set(handles.popupmenu8,'visible',strings{3})
 set(handles.popupmenu9,'visible',strings{3})
 set(handles.popupmenu10,'visible',strings{3})
@@ -1052,28 +1051,6 @@ end
 
 
 
-function edit19_Callback(hObject, eventdata, handles)
-% hObject    handle to edit19 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of edit19 as text
-%        str2double(get(hObject,'String')) returns contents of edit19 as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function edit19_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit19 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 % --- Executes on selection change in popupmenu9.
 function popupmenu9_Callback(hObject, eventdata, handles)
 % hObject    handle to popupmenu9 (see GCBO)
@@ -1188,7 +1165,6 @@ try
 
     set(handles.edit18, 'String',num2str(handles.param.num_dots));
     set(handles.edit17, 'String',num2str(rad2deg(handles.param.dot_radius)));
-    set(handles.edit19, 'String',num2str(handles.param.view_radius));
     set(handles.edit1, 'String',num2str(rad2deg(handles.param.spat_freq)));
     set(handles.edit2, 'String',num2str(rad2deg(handles.param.step_size)));
     set(handles.edit3, 'String',num2str(handles.param.duty_cycle));
@@ -1208,6 +1184,7 @@ try
     sdata.phase_shift = handles.param.phase_shift;
     sdata.back_frame = handles.param.back_frame;
     sdata.flip_right = handles.param.flip_right;
+    sdata.snap_dots = handles.param.snap_dots;
     s2data.sa_mask = handles.param.sa_mask;
     s2data.long_lat_mask = handles.param.long_lat_mask;
     s2data.enable = [0 0];
