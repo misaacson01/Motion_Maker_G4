@@ -1,30 +1,25 @@
-function [x, y, z, p_rad, rot180] = arena_coordinates
-% FUNCTION [x, y, z, p_rad, rot180] = arena_coordinates
+function arena_coordinates(Psize, Pcols, Prows, Pcircle, rot180, model, rotations, translations)
+% FUNCTION arena_coordinates(Prows, Pcols, Psize, Pcircle, rot180, model, rotations, translations)
 %
 % Calculates the cartesian coordinates of every pixel in a cylindrical LED
-% arena. Also calculates the distance between pixels in radians (where the
-% arena's circumference is 2*pi.) Check the user-defined arena parameters 
-% within this script to see if it fits your specific LED arena.
-% 
-% This script makes assumptions about how an arena is typically mounted 
-% (e.g. what part of the arena is considered "straight ahead" of the fly.)
-% For differently rotated arenas, you can use the rotate_coordinates script 
-% at the end of this one to adjust the arena's coordinates as desired.
+% arena, according to the input arena dimensions and parameters. Also 
+% calculates the distance between pixels in radians (where the arena's 
+% circumference is 2*pi.)
 %
-% outputs:
-% x/y/z: matrices of cartesian coordinates for all pixels in the arena
+% inputs:
+% Psize: # of pixels per row (or column) of a single LED panel (e.g. 8 or 16)
+% Pcols: # of columns of LED panels 
+% Prows: # of rows of LED panels
+% Pcircle: # of panel columns that would fully enclose the arena
+% rot180: if arena is flipped upside-down
+% model: 'polygonal cylinder' or 'smooth cylinder' 
+% rotations: [yaw pitch roll] rotations of arena (in radians)
+% translations: [x y z] translations of arena (for arena circumferance = 2pi)
+% 
+% saved outputs: (saved to C:\matlabroot\G4_arena\arena_parameters.mat)
+% arena_x/y/z: matrices of cartesian coordinates for all pixels in the arena
 % p_rad: distance between pixels (along rows/column directions) in radians
-% rot180: 1 if physical arena is flipped upside-down (0 otherwise)
- 
-
-%% user-defined arena parameters
-Psize = 16; %# of pixels per row (or column) of a single LED panel
-Pcols = 12; %# of columns of LED panels 
-Prows = 3; %# of rows of LED panels
-Pcircle = 18; %# of panel columns that would fully enclose the arena
-rot180 = 1; %if physical arena is flipped upside-down
-model = 'poly'; %'smooth' or 'poly' cylinder 
-%%
+% arena_param: structure containing all input parameters
 
 rows = Prows*Psize; %# of rows of pixels in arena
 cols = Pcols*Psize; %# of columns of pixels in arena
@@ -32,8 +27,8 @@ Pan_rad = 2*pi/Pcircle; %radians between panel columns
 p_rad = Pan_rad/Psize; %radians between pixels
 
 %calculate height (z) of each pixel
-z = p_rad*(1-rows)/2:p_rad:p_rad*(rows-1)/2; 
-z = repmat(flipud(z'),1,cols);
+arena_z = p_rad*(1-rows)/2:p_rad:p_rad*(rows-1)/2; 
+arena_z = repmat(flipud(arena_z'),1,cols);
 
 %calculate the angle of each panel column's center from straight ahead
 cphi = -Pan_rad*(Pcols-1)/2:Pan_rad:Pan_rad*(Pcols-1)/2;
@@ -51,28 +46,46 @@ points = (p_rad-Pan_rad)/2:p_rad:(Pan_rad-p_rad)/2;
 points = repmat(points,[1 Pcols]);
         
 switch model
-    case 'smooth' %model as smooth-surfaced cylinder (radius = 1)
+    case 'smooth cylinder' %model as smooth-surfaced cylinder (radius = 1)
         %calculate angle from straight ahead of each pixel column
         col_phi = cphi + points;
         
         %calculate x,y coordinates from angle
-        x = repmat(sin(col_phi), rows, 1);
-        y = repmat(cos(col_phi), rows, 1);
+        arena_x = repmat(sin(col_phi), rows, 1);
+        arena_y = repmat(cos(col_phi), rows, 1);
         
-    case 'poly' %model as polygonal cylinder
+    case 'polygonal cylinder' %model as polygonal cylinder (circumferance = 2pi)
         apothem = Pan_rad/(2*tan(pi/Pcircle));
         
         %calculate x,y coordinates of each pixel's panel column center
-        x = apothem*sin(cphi);
-        y = apothem*cos(cphi);
+        arena_x = apothem*sin(cphi);
+        arena_y = apothem*cos(cphi);
         
         %adjust each pixel's coordinate from center of panel
-        x = x + points.*cos(-cphi);
-        y = y + points.*sin(-cphi);
-        x = repmat(x,[rows 1]);
-        y = repmat(y,[rows 1]);
+        arena_x = arena_x + points.*cos(-cphi);
+        arena_y = arena_y + points.*sin(-cphi);
+        arena_x = repmat(arena_x,[rows 1]);
+        arena_y = repmat(arena_y,[rows 1]);
 end
 
-%make any desired adjustments to arena position/orientation here
+%make final adjustments to arena
+[arena_x, arena_y, arena_z] = rotate_coordinates(arena_x, arena_y, arena_z, rotations);
+arena_x = arena_x + translations(1);
+arena_y = arena_y + translations(2);
+arena_z = arena_z + translations(3);
+
+%save arena coordinates and parameters
+if ~exist('C:\matlabroot\G4_arena\','dir')
+    mkdir('C:\matlabroot\G4_arena\');
+end
+arena_param.Psize = Psize;
+arena_param.Pcols = Pcols;
+arena_param.Prows = Prows;
+arena_param.Pcircle = Pcircle;
+arena_param.rot180 = rot180;
+arena_param.model = model;
+arena_param.rotations = rotations;
+arena_param.translations = translations;
+save('C:\matlabroot\G4_arena\arena_parameters.mat','arena_x','arena_y','arena_z','p_rad','arena_param');
 
 end
