@@ -54,7 +54,8 @@ end
 
 %% calculate arena coordinates
 %get starting arena parameters
-[arena_x, arena_y, arena_z, p_rad, rot180] = arena_coordinates;
+load('C:\matlabroot\G4_arena\arena_parameters.mat');
+rot180 = arena_param.rot180;
 param.p_rad = p_rad;
 [param.rows, param.cols] = size(arena_x);
 

@@ -1254,3 +1254,22 @@ function Motion_Maker_G4_gui_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to Motion_Maker_G4_gui (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton11_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+gui2script_G4(handles.param);
+
+
+% --- Executes on button press in pushbutton11.
+function pushbutton12_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton7 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+configure_arena;
+

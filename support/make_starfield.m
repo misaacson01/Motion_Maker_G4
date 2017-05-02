@@ -1,7 +1,7 @@
 function [Pats, num_frames, true_step_size] = make_starfield(param, arena_x, arena_y, arena_z)
 % function [Pats, num_frames, true_step_size] = make_starfield(param, arena_x, arena_y, arena_z)
 % 
-% Creates moving pattern of starfield of dots
+% Creates moving pattern of starfield of dots.
 % 
 % inputs: (all angles/distances/sizes in units of radians)
 % arena_x/y/z: cartesian coordinates of pixels in arena
@@ -48,67 +48,36 @@ end
 
 
 %% calculate random starting coordinates of dots
-num_dots = param.num_dots;
-view_rad = 1; %radius of sphere in which dots can be seen
-dots_x = (rand(num_dots, 1)*2 - 1)*view_rad;
-dots_y = (rand(num_dots, 1)*2 - 1)*view_rad;
-dots_z = (rand(num_dots, 1)*2 - 1)*view_rad;
-[~, ~, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
+dots_x = rand(param.num_dots, 1)*2 - 1;
+dots_y = rand(param.num_dots, 1)*2 - 1;
+dots_z = rand(param.num_dots, 1)*2 - 1;
 
-% recalculate coordinates of dots that overlap the arena center  
+% eliminate dots that overlap the arena center and that will never fall 
+% within the view radius
 actual_dot_radius = tan(param.dot_radius);
 if strncmpi(param.motion_type,'t',1)
     dots_pole_dist = hypot(dots_x, dots_y);
-    idx = dots_pole_dist<=actual_dot_radius;
-    while any(idx)
-        dots_x(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
-        dots_y(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
-        dots_pole_dist(idx) = hypot(dots_x(idx), dots_y(idx));
-        idx = dots_pole_dist<=actual_dot_radius;
-    end
-    [dots_phi, dots_theta, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
+    elim_idx = dots_pole_dist<=actual_dot_radius & dots_pole_dist>1;
+    
+elseif strncmpi(param.motion_type,'r',1)
+    [~, ~, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
+    elim_idx = dots_rho<=actual_dot_radius & dots_rho>1;
     
 else
-    idx = dots_rho<actual_dot_radius;
-    while any(idx)
-        dots_x(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
-        dots_y(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
-        dots_z(idx) = (rand(sum(idx),1)*2 - 1)*view_rad;
-        [~, ~, dots_rho(idx)] = cart2sphere(dots_x(idx), dots_y(idx), dots_z(idx));
-        idx = dots_rho<actual_dot_radius;
-    end
-    idx = dots_rho>=view_rad;
-    dots_x(idx) = [];
-    dots_y(idx) = [];
-    dots_z(idx) = [];
-    [dots_phi, dots_theta, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
-    num_dots = length(dots_x);
+    dots_pole_dist = hypot(dots_x, dots_y);
+    dots_theta = (dots_z+1)*pi/2; %spread dots evenly over theta rather than z
+    dots_z = -dots_pole_dist./tan(dots_theta); %recalculate z coordinates
+    [~, ~, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
+    
+    %keep an even distribution of dots over theta
+    elim_idx = dots_rho<=actual_dot_radius & dots_pole_dist>1;
 end
-
-%Method for maintaining even pixel density as dots travel to/from poles in 
-%expansion-contraction motion:
-%have some dots disappear before reaching poles and traverse equatorial
-%region again (on a new randomised phi trajectory, but keeping same rho)
-%before returning to their starting trajectory and completing a loop
-if strncmpi(param.motion_type,'e',1)
-    %array of 2 phi trajectories for each dot
-    dots_2_phi = [dots_phi'; 2*pi*(rand(1,num_dots)*2 - 1)];
-  
-    %array of 1-D distance from pole (randomly chosen from x and y)
-    xy_idx = logical(randi(2,[num_dots 1])-1);
-    dots_pole_dist = nan(num_dots,1);
-    dots_pole_dist(xy_idx) = dots_x(xy_idx);
-    dots_pole_dist(~xy_idx) = dots_y(~xy_idx);
-    
-    %maximum allowed theta for each trajectory before the dot will switch
-    max_theta = [pi-abs(asin(dots_pole_dist')); pi-(pi/2-abs(asin(dots_pole_dist')))];
-    
-    %index of trajectories - all dots start with original trajectories (row 1)
-    traj_idx = logical([ones(1,num_dots); zeros(1,num_dots)]); 
-    
-    %randomize distances, otherwise poles will favor closer (i.e. larger) dots
-    dots_rho = dots_rho(randperm(num_dots)); 
-end
+dots_x(elim_idx) = [];
+dots_y(elim_idx) = [];
+dots_z(elim_idx) = [];
+dots_pole_dist2 = dots_x.^2 + dots_y.^2; %use for exp-con to maintain even pixel density
+[dots_phi, dots_theta, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
+num_dots = length(dots_x);
 
 
 %% calculate brightness level of dots (difference from 2nd level)
@@ -126,8 +95,8 @@ if strncmpi(param.motion_type,'r',1)
     num_frames = round(2*pi/param.step_size);
     true_step_size = 2*pi/num_frames;
 elseif strncmpi(param.motion_type,'t',1)
-    num_frames = round(2*view_rad/param.step_size); 
-    true_step_size = 2*view_rad/num_frames;
+    num_frames = round(2/param.step_size); 
+    true_step_size = 2/num_frames;
 else
     num_frames = round(pi/param.step_size);
     true_step_size = pi/num_frames;
@@ -164,19 +133,22 @@ end
 %% find dots that will fall within arena coordinates
 %valid dots fall within arena fov and within view radius
 if param.snap_dots
-vdot_idx = cdots_theta<max(max(cpat_theta))+p_rad & ...
-                cdots_theta>min(min(cpat_theta))-p_rad & ...
-                cdots_phi<max(max(cpat_phi))+p_rad & ...
-                cdots_phi>min(min(cpat_phi))-p_rad & ...
-                cdots_rho<view_rad+dots_rad;
+    c_rad = p_rad; %dots more than one pixel radius away from arena will not be visible
 else
-vdot_idx = cdots_theta<max(max(cpat_theta))+dots_rad & ...
-                cdots_theta>min(min(cpat_theta))-dots_rad & ...
-                cdots_phi<max(max(cpat_phi))+dots_rad & ...
-                cdots_phi>min(min(cpat_phi))-dots_rad & ...
-                cdots_rho<view_rad+dots_rad;
+    c_rad = dots_rad; %dots more than 1 dot radius away will not be visible
 end
-num_vdots = sum(vdot_idx);
+
+%dots that fall within arena field of view
+vdot_idx = cdots_theta<max(max(cpat_theta))+c_rad & cdots_theta>min(min(cpat_theta))-c_rad ...
+           & cdots_phi<max(max(cpat_phi))+c_rad & cdots_phi>min(min(cpat_phi))-c_rad;
+
+%dots that fall within the view radius
+if strncmpi(param.motion_type,'t',1)
+    vdot_idx = vdot_idx & cdots_rho<=1;
+elseif strncmpi(param.motion_type,'e',1)
+    vdot_idx = vdot_idx & dots_pole_dist2<=sin(dots_theta);
+end
+num_vdots = sum(vdot_idx); %total number of valid dots
 
 
 %% map valid dots to surface of unit sphere (rho=1)
@@ -197,6 +169,7 @@ if param.snap_dots
         sdots_z(d) = pat_z(vpix_inds(min_ind));
     end
 end
+
 
 %% find pixels that are close to each valid dot
 %convert pattern and dot matrices to arrays (valid dots in 3rd dim) and
@@ -251,10 +224,7 @@ elseif strncmpi(param.dot_occ,'m',1) %average of all dots overlapping each pixel
 elseif strncmpi(param.dot_occ,'c',1) %only shows closest dot (edge pixels will be partially occluded)
     %sort by dot closeness
     [~, order] = sort(dots_rho(vdot_idx)); 
-    %order = flipud(order); %to sort by farthest
     fullPats = fullPats(:,:,order);
-    
-    %show cum dot brightness
     frac_array = frac_array(:,:,order);
     
     %find indices of closest dots for each pixel (can see past edge pixels, to an extent)
@@ -281,20 +251,12 @@ if f<num_frames
         
     elseif strncmpi(param.motion_type,'t',1)
         dots_z = dots_z + true_step_size; %for translation, motion takes place through z
-        dots_z(dots_z>view_rad) = dots_z(dots_z>view_rad) - 2*view_rad;
+        dots_z(dots_z>1) = dots_z(dots_z>1) - 2;
         [dots_phi, dots_theta, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
         
     else
         dots_theta = dots_theta + true_step_size; %for exp-con, motion takes place through theta
         dots_theta(dots_theta>pi) = dots_theta(dots_theta>pi) - pi;
-        
-        %switch dot trajectories for dots that have completed their current path
-        e_idx_change = dots_theta>max_theta(traj_idx); %indices of dots done with their current trajectory
-        dots_theta(e_idx_change) = dots_theta(e_idx_change) - pi/2; %start theta of other trajectory
-        traj_idx([e_idx_change'; e_idx_change']) = ~traj_idx([e_idx_change'; e_idx_change']);
-        traj_idx = logical(traj_idx);   
-        dots_phi = dots_2_phi(traj_idx); %switch to phi of other trajectory
-        
         [dots_x, dots_y, dots_z] = sphere2cart(dots_phi,dots_theta,dots_rho);
     end
 end
