@@ -187,24 +187,8 @@ end
 handles.cur_frame = 1+handles.param.back_frame;
 set(handles.edit16,'String',num2str(handles.cur_frame));
 set(handles.text24,'String',num2str(handles.num_frames));
-
-plot_type = get(handles.popupmenu6, 'Value');
-switch plot_type
-    case 1
-        handles.x = rad2deg(handles.arena_phi);
-        handles.y = rad2deg(handles.arena_theta)-90; %convert to lattitude
-        handles.dot_size = 140*handles.p_rad;
-        handles.axes = [-180 180 -90 90];
-    case 2
-        rows = length(handles.arena_phi(:,1));
-        cols = length(handles.arena_phi(1,:));
-        handles.x = repmat(1:cols,rows,1);
-        handles.y = repmat((1:rows)',1,cols);
-        handles.dot_size = 320*handles.p_rad;
-        handles.axes = [0 cols+1 0 rows+1];
-end
-arena_projection(handles.Pats, handles.param.gs_val, handles.x, handles.y, handles.axes, handles.dot_size, handles.cur_frame, handles.param.rot180);
-
+handles.plot_type = get(handles.popupmenu6, 'Value');
+arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
 
 %set pattern name
 if handles.loaded_pattern
@@ -740,7 +724,7 @@ if handles.cur_frame>handles.num_frames;
     handles.cur_frame = 1;
 end
 set(handles.edit16,'String',num2str(handles.cur_frame));
-arena_projection(handles.Pats, handles.param.gs_val, handles.x, handles.y, handles.axes, handles.dot_size, handles.cur_frame, handles.param.rot180);
+arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
 guidata(hObject, handles);
 
 
@@ -755,7 +739,7 @@ if handles.cur_frame<1;
     handles.cur_frame = handles.num_frames;
 end
 set(handles.edit16,'String',num2str(handles.cur_frame));
-arena_projection(handles.Pats, handles.param.gs_val, handles.x, handles.y, handles.axes, handles.dot_size, handles.cur_frame, handles.param.rot180);
+arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
 guidata(hObject, handles);
 
 
@@ -767,22 +751,8 @@ function popupmenu6_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu6 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu6
-plot_type = get(hObject, 'Value');
-switch plot_type
-    case 1
-        handles.x = rad2deg(handles.arena_phi);
-        handles.y = rad2deg(handles.arena_theta)-90; %convert to lattitude
-        handles.dot_size = 140*handles.p_rad;
-        handles.axes = [-180 180 -90 90];
-    case 2
-        rows = length(handles.arena_phi(:,1));
-        cols = length(handles.arena_phi(1,:));
-        handles.x = repmat(1:cols,rows,1);
-        handles.y = repmat(flipud((1:rows)'),1,cols);
-        handles.dot_size = 320*handles.p_rad;
-        handles.axes = [0 cols+1 0 rows+1];
-end
-arena_projection(handles.Pats, handles.param.gs_val, handles.x, handles.y, handles.axes, handles.dot_size, handles.cur_frame, handles.param.rot180);
+handles.plot_type = get(hObject, 'Value');
+arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
 guidata(hObject, handles);
 
 
@@ -1204,25 +1174,24 @@ try
     
 catch 
     disp('could not load all pattern parameters')
-    Pats = squeeze(pattern.Pats);
-    rows = size(Pats,1);
-    cols = size(Pats,2);
-    handles.x = repmat(1:cols,rows,1);
-    handles.y = repmat(flipud((1:rows)'),1,cols);
-    handles.dot_size = 7;
-    handles.axes = [0 cols+1 0 rows+1];
+    handles.Pats = squeeze(pattern.Pats);
+    if max(max(max(max(handles.Pats))))>1
+        handles.param.gs_val = 4;
+    else
+        handles.param.gs_val = 1;
+    end
+    handles.plot_type = 2;
     handles.cur_frame = 1;
     handles.num_frames = size(Pats,3);
     set(handles.edit16,'String',num2str(handles.cur_frame));
     set(handles.text24,'String',num2str(handles.num_frames));
     set(handles.edit15,'String',handles.patName);
-    set(handles.popupmenu6, 'Value', 2);
+    set(handles.popupmenu6, 'Value', handles.plot_type);
     
     guidata(hObject, handles);
     
-    arena_projection(Pats, pattern.gs_val, handles.x, handles.y, handles.axes, handles.dot_size, handles.cur_frame, handles.param.rot180);
+    arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
 end
-    
     
 
 % --- Executes on selection change in popupmenu10.

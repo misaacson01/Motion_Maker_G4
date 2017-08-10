@@ -1,4 +1,4 @@
-function arena_projection(Pats, gs_val, x, y, axes, dot_size, frame, rot180)
+function arena_projection(Pats, plot_type, arena_phi, arena_theta, p_rad, frame, param)
 % FUNCTION arena_projection(Pats, gs_val, x, y, axes, dot_size, frame, rot180)
 % 
 % Plots a single frame of the input pattern as a scatter plot of dots.
@@ -19,16 +19,32 @@ max_h = 0.5;
 center_h = 0.33;
 center_w = 0.5;
 
+%determine drawing parameters based on plot type
+switch plot_type
+    case 1 %mercator projection
+        x = rad2deg(arena_phi);
+        y = rad2deg(arena_theta)-90; %convert to lattitude
+        dot_size = 140*p_rad;
+        axes = [-180 180 -90 90];
+    case 2 %grid projection
+        rows = length(arena_phi(:,1));
+        cols = length(arena_phi(1,:));
+        x = repmat(1:cols,rows,1);
+        y = repmat((1:rows)',1,cols);
+        dot_size = 320*p_rad;
+        axes = [0 cols+1 0 rows+1];
+end
+
 %turn values into vectors for easy plotting
 num_pixels = numel(x);
 x_vec = reshape(x,[num_pixels 1]);
 y_vec = reshape(y,[num_pixels 1]);
 
 %convert Pats to vector of values between 0 and 1
-if rot180==1
+if param.rot180==1
     Pats = rot90(Pats,2);
 end
-Pats_vec = reshape(Pats(:,:,frame)/(2^gs_val - 1),[num_pixels 1]);
+Pats_vec = reshape(Pats(:,:,frame)/(2^param.gs_val - 1),[num_pixels 1]);
 
 %draw pixels in green
 Color = [zeros(num_pixels,1) Pats_vec zeros(num_pixels,1)];
