@@ -199,7 +199,7 @@ switch plot_type
         rows = length(handles.arena_phi(:,1));
         cols = length(handles.arena_phi(1,:));
         handles.x = repmat(1:cols,rows,1);
-        handles.y = repmat(flipud((1:rows)'),1,cols);
+        handles.y = repmat((1:rows)',1,cols);
         handles.dot_size = 320*handles.p_rad;
         handles.axes = [0 cols+1 0 rows+1];
 end

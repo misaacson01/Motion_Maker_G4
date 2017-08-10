@@ -12,7 +12,7 @@ function arena_coordinates(Psize, Pcols, Prows, Pcircle, rot180, model, rotation
 % Prows: # of rows of LED panels
 % Pcircle: # of panel columns that would fully enclose the arena
 % rot180: if arena is flipped upside-down
-% model: 'polygonal cylinder' or 'smooth cylinder' 
+% model: 'poly' or 'smooth' cylinder 
 % rotations: [yaw pitch roll] rotations of arena (in radians)
 % translations: [x y z] translations of arena (for arena circumferance = 2pi)
 % 
@@ -28,7 +28,7 @@ p_rad = Pan_rad/Psize; %radians between pixels
 
 %calculate height (z) of each pixel
 arena_z = p_rad*(1-rows)/2:p_rad:p_rad*(rows-1)/2; 
-arena_z = repmat(flipud(arena_z'),1,cols);
+arena_z = repmat(arena_z',1,cols);
 
 %calculate the angle of each panel column's center from straight ahead
 cphi = -Pan_rad*(Pcols-1)/2:Pan_rad:Pan_rad*(Pcols-1)/2;
@@ -46,7 +46,7 @@ points = (p_rad-Pan_rad)/2:p_rad:(Pan_rad-p_rad)/2;
 points = repmat(points,[1 Pcols]);
         
 switch model
-    case 'smooth cylinder' %model as smooth-surfaced cylinder (radius = 1)
+    case 'smooth' %model as smooth-surfaced cylinder (radius = 1)
         %calculate angle from straight ahead of each pixel column
         col_phi = cphi + points;
         
@@ -54,7 +54,7 @@ switch model
         arena_x = repmat(sin(col_phi), rows, 1);
         arena_y = repmat(cos(col_phi), rows, 1);
         
-    case 'polygonal cylinder' %model as polygonal cylinder (circumferance = 2pi)
+    case 'poly' %model as polygonal cylinder (circumferance = 2pi)
         apothem = Pan_rad/(2*tan(pi/Pcircle));
         
         %calculate x,y coordinates of each pixel's panel column center
