@@ -54,6 +54,9 @@ end
 
 %% calculate arena coordinates
 %get starting arena parameters
+if ~exist('C:\matlabroot\G4_arena\arena_parameters.mat','file') %create default arena
+    arena_coordinates(16, 12, 3, 18, 0, 'polygonal cylinder', [0 0 0], [0 0 0]);
+end
 load('C:\matlabroot\G4_arena\arena_parameters.mat');
 rot180 = arena_param.rot180;
 param.p_rad = p_rad;
