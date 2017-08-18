@@ -168,11 +168,9 @@ end
 
 %generate pattern (keep old Pats variable if loading from file)
 if handles.loaded_pattern
-    [~, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.param.true_step_size, ...
-        handles.param.rot180] = Motion_Maker_G4(handles.param);
+    [~, handles.param.true_step_size, handles.param.rot180] = Motion_Maker_G4(handles.param);
 else
-    [handles.Pats, handles.arena_phi, handles.arena_theta, handles.p_rad, ...
-        handles.param.true_step_size, handles.param.rot180] = Motion_Maker_G4(handles.param);
+    [handles.Pats, handles.param.true_step_size, handles.param.rot180] = Motion_Maker_G4(handles.param);
 end
 handles.num_frames = size(handles.Pats,3);
 handles.param.stretch = ones(handles.num_frames,1);
@@ -188,7 +186,7 @@ handles.cur_frame = 1+handles.param.back_frame;
 set(handles.edit16,'String',num2str(handles.cur_frame));
 set(handles.text24,'String',num2str(handles.num_frames));
 handles.plot_type = get(handles.popupmenu6, 'Value');
-arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
+arena_projection(handles.Pats, handles.param.gs_val, handles.plot_type, handles.cur_frame);
 
 %set pattern name
 if handles.loaded_pattern
@@ -201,11 +199,11 @@ else
     cd(handles.save_dir);
     patfiles = ls('Pattern*.mat');
     if isempty(patfiles)
-        handles.ID = 1;
+        handles.param.ID = 1;
     else
-        handles.ID = size(patfiles,1)+1;
+        handles.param.ID = size(patfiles,1)+1;
     end
-    handles.patName = ['Pattern_' num2str(handles.ID, '%04d') '_G4.mat']; 
+    handles.patName = ['Pattern_' num2str(handles.param.ID, '%04d') '_G4.mat']; 
 end
 set(handles.edit15,'String',handles.patName);
 
@@ -724,7 +722,7 @@ if handles.cur_frame>handles.num_frames;
     handles.cur_frame = 1;
 end
 set(handles.edit16,'String',num2str(handles.cur_frame));
-arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
+arena_projection(handles.Pats, handles.param.gs_val, handles.plot_type, handles.cur_frame);
 guidata(hObject, handles);
 
 
@@ -739,7 +737,7 @@ if handles.cur_frame<1;
     handles.cur_frame = handles.num_frames;
 end
 set(handles.edit16,'String',num2str(handles.cur_frame));
-arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
+arena_projection(handles.Pats, handles.param.gs_val, handles.plot_type, handles.cur_frame);
 guidata(hObject, handles);
 
 
@@ -752,7 +750,7 @@ function popupmenu6_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu6 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu6
 handles.plot_type = get(hObject, 'Value');
-arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
+arena_projection(handles.Pats, handles.param.gs_val, handles.plot_type, handles.cur_frame);
 guidata(hObject, handles);
 
 
@@ -814,11 +812,11 @@ cd(handles.save_dir);
 %set pattern name
 patfiles = ls('Pattern*.mat');
 if isempty(patfiles)
-    handles.ID = 1;
+    handles.param.ID = 1;
 else
-    handles.ID = size(patfiles,1)+1;
+    handles.param.ID = size(patfiles,1)+1;
 end
-handles.patName = ['Pattern_' num2str(handles.ID, '%04d') '_G4.mat'];
+handles.patName = ['Pattern_' num2str(handles.param.ID, '%04d') '_G4.mat'];
 set(handles.edit15,'String',handles.patName);
 guidata(hObject, handles);
 
@@ -831,23 +829,8 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 handles.save_dir = get(handles.text26,'String');
 handles.patName = get(handles.edit15,'String');
 
-%store pattern and all parameters
-pattern.Pats = handles.Pats;
-pattern.gs_val = handles.param.gs_val;
-pattern.param = handles.param;
-
-%save the mat file
-if ~exist(handles.save_dir,'dir')
-    mkdir(handles.save_dir)
-end
-
-matFileName = fullfile(handles.save_dir, handles.patName);
-if exist(matFileName,'file')
-    error('pattern already exists in save folder with that name')
-end
-
-save(matFileName, 'pattern');
-disp(['Pattern saved as "' matFileName '"'])
+%save .mat and .pat file-s
+save_pattern_G4(handles.Pats, handles.param, handles.save_dir, handles.patName)
 
 
 % --- Executes during object creation, after setting all properties.
@@ -925,7 +908,7 @@ else
     handles.cur_frame = round(frame);
 end
 set(hObject,'String',num2str(handles.cur_frame));
-arena_projection(handles.Pats, handles.param.gs_val, handles.x, handles.y, handles.axes, handles.dot_size, handles.cur_frame, handles.param.rot180);
+arena_projection(handles.Pats, handles.param.gs_val, handles.plot_type, handles.cur_frame);
 guidata(hObject, handles);
 
 
@@ -1190,7 +1173,7 @@ catch
     
     guidata(hObject, handles);
     
-    arena_projection(handles.Pats, handles.plot_type, handles.arena_phi, handles.arena_theta, handles.p_rad, handles.cur_frame, handles.param);
+    arena_projection(handles.Pats, handles.param.gs_val, handles.plot_type, handles.cur_frame);
 end
     
 
@@ -1231,7 +1214,7 @@ function pushbutton11_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-gui2script_G4(handles.param);
+MMgui2script_G4(handles.param);
 
 
 % --- Executes on button press in pushbutton11.

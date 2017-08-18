@@ -52,20 +52,20 @@ function configure_arena_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to configure_arena (see VARARGIN)
 
-load('C:\matlabroot\G4_arena\arena_parameters.mat')
-set(handles.edit1, 'String',num2str(arena_param.Psize));
-set(handles.edit2, 'String',num2str(arena_param.Prows));
-set(handles.edit3, 'String',num2str(arena_param.Pcols));
-set(handles.edit4, 'String',num2str(arena_param.Pcircle));
-set(handles.checkbox1, 'Value', arena_param.rot180);
-set(handles.edit5, 'String',num2str(arena_param.rotations(1))); 
-set(handles.edit6, 'String',num2str(arena_param.rotations(2))); 
-set(handles.edit7, 'String',num2str(arena_param.rotations(3))); 
-set(handles.edit8, 'String',num2str(arena_param.translations(1))); 
-set(handles.edit9, 'String',num2str(arena_param.translations(2))); 
-set(handles.edit10, 'String',num2str(arena_param.translations(3)));
+load('C:\matlabroot\G4\arena\arena_parameters.mat')
+set(handles.edit1, 'String',num2str(aparam.Psize));
+set(handles.edit2, 'String',num2str(aparam.Prows));
+set(handles.edit3, 'String',num2str(aparam.Pcols));
+set(handles.edit4, 'String',num2str(aparam.Pcircle));
+set(handles.checkbox1, 'Value', aparam.rot180);
+set(handles.edit5, 'String',num2str(aparam.rotations(1))); 
+set(handles.edit6, 'String',num2str(aparam.rotations(2))); 
+set(handles.edit7, 'String',num2str(aparam.rotations(3))); 
+set(handles.edit8, 'String',num2str(aparam.translations(1))); 
+set(handles.edit9, 'String',num2str(aparam.translations(2))); 
+set(handles.edit10, 'String',num2str(aparam.translations(3)));
 
-popup_val = find(strncmpi(arena_param.model,{'p' 's'},1));
+popup_val = find(strncmpi(aparam.model,{'p' 's'},1));
 set(handles.popupmenu1, 'Value',popup_val);
 
 % Choose default command line output for configure_arena

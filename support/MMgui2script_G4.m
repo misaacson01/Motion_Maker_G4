@@ -1,4 +1,4 @@
-function gui2script_G4(param)
+function MMgui2script_G4(param)
 % function gui2script_G4(param)
 %
 % creates a matlab script file that will create and save the pattern
@@ -11,19 +11,19 @@ function gui2script_G4(param)
 % inputs:
 % param: all pattern parameters
 
-script_dir = 'C:\matlabroot\Motion_Maker_G4_scripts\';
+script_dir = 'C:\matlabroot\G4\Scripts\';
 if ~exist(script_dir, 'dir')
     mkdir(script_dir);
 end
-if exist([script_dir 'temp_script_G4.m'],'file')
+if exist([script_dir 'temp_pattern_script_G4.m'],'file')
     recycle('on');
-    delete([script_dir 'temp_script_G4.m']);
+    delete([script_dir 'temp_pattern_script_G4.m']);
     recycle('off');
 end
-FID = fopen([script_dir 'temp_script_G4.m'],'a');
+FID = fopen([script_dir 'temp_pattern_script_G4.m'],'a');
 
 fprintf(FID,'%s\n','% Script version of Motion_Maker_G4 with current GUI parameters');
-fprintf(FID,'%s\n','% (script saved in C:\matlabroot\Motion_Maker_G4_scripts\)');
+fprintf(FID,'%s\n','% (script saved in C:\matlabroot\G4\Scripts\)');
 fprintf(FID,'%s\n','%');
 fprintf(FID,'%s\n','% Save this script with a new filename to keep it from being overwritten');
 fprintf(FID,'%s\n','');
@@ -57,20 +57,24 @@ fprintf(FID,'%s\n',['param.phase_shift = ' num2str(param.phase_shift) '; %shifts
 fprintf(FID,'%s\n','');
 fprintf(FID,'%s\n','');
 fprintf(FID,'%s\n','%% generate pattern');
-fprintf(FID,'%s\n','[Pats, arena_phi, arena_theta, p_rad, param.true_step_size, param.rot180] = Motion_Maker_G4(param);');
+fprintf(FID,'%s\n','[Pats, param.true_step_size, param.rot180] = Motion_Maker_G4(param);');
 fprintf(FID,'%s\n','param.stretch = zeros(size(Pats,3),1); %stretch increases (within limits) the per-frame brightness -- zeros add no brightness');
 fprintf(FID,'%s\n','');
 fprintf(FID,'%s\n','');
 fprintf(FID,'%s\n','%% save pattern');
-fprintf(FID,'%s\n','pattern.Pats = Pats;');
-fprintf(FID,'%s\n','pattern.gs_val = param.gs_val;');
-fprintf(FID,'%s\n','pattern.param = param;');
-fprintf(FID,'%s\n','matFileName = ''C:\matlabroot\Motion_Maker_G4_scripts\Pattern_temp_G4.mat'';');
-fprintf(FID,'%s\n','save(matFileName, ''pattern'');');
-fprintf(FID,'%s\n','disp([''Pattern saved as "'' matFileName ''"''])');
+fprintf(FID,'%s\n','save_dir = ''C:\matlabroot\G4\Patterns\'';');
+fprintf(FID,'%s\n','cd(save_dir);');
+fprintf(FID,'%s\n','patfiles = ls(''Pattern*.mat'');');
+fprintf(FID,'%s\n','if isempty(patfiles)');
+fprintf(FID,'%s\n','    param.ID = 1;');
+fprintf(FID,'%s\n','else');
+fprintf(FID,'%s\n','    param.ID = size(patfiles,1)+1;');
+fprintf(FID,'%s\n','end');
+fprintf(FID,'%s\n','patName = [''Pattern_'' num2str(param.ID, ''%04d'') ''_G4.mat''];');
+fprintf(FID,'%s\n','save_pattern_G4(Pats, param, save_dir, patName);');
 fprintf(FID,'%s\n','');
 
 fclose(FID);
-edit C:\matlabroot\Motion_Maker_G4_scripts\temp_script_G4.m;
+edit C:\matlabroot\G4\Scripts\temp_pattern_script_G4.m;
 
 end
