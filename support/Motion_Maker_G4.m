@@ -1,4 +1,4 @@
-function [Pats, arena_phi, arena_theta, p_rad, true_step_size, rot180] = Motion_Maker_G4(param)
+function [Pats, true_step_size, rot180] = Motion_Maker_G4(param)
 % FUNCTION [Pats, arena_phi, arena_theta, true_step_size, rot180] = Motion_Maker_G4(param)
 %
 % inputs:
@@ -7,8 +7,6 @@ function [Pats, arena_phi, arena_theta, p_rad, true_step_size, rot180] = Motion_
 % outputs:
 % Pats: array of brightness values for each pixel in arena (multiple frames
 %      in 3rd dimension)
-% arena_phi/theta: spherical coordinates of pixels in arena
-% p_rad: distance between pixels (along rows/column directions) in radians
 % true_step_size: value (in radians) of corrected step_size (may have been
 %      altered in order to divide evenly into spatial frequency of pattern)
 % rot180: if physical arena is flipped upside-down
@@ -54,17 +52,18 @@ end
 
 %% calculate arena coordinates
 %get starting arena parameters
-if ~exist('C:\matlabroot\G4_arena\arena_parameters.mat','file') %create default arena
-    arena_coordinates(16, 12, 3, 18, 0, 'polygonal cylinder', [0 0 0], [0 0 0]);
+if ~exist('C:\matlabroot\G4\Arena\arena_parameters.mat','file') %create default arena
+    arena_coordinates(16, 12, 3, 18, 0, 'poly', [0 0 0], [0 0 0]);
 end
-load('C:\matlabroot\G4_arena\arena_parameters.mat');
-rot180 = arena_param.rot180;
+load('C:\matlabroot\G4\Arena\arena_parameters.mat');
+if abs(aparam.rotations(2)-param.arena_pitch)>0.001 %check if arena_pitch has been changed
+    arena_coordinates(aparam.Psize, aparam.Pcols, aparam.Prows, aparam.Pcircle, aparam.rot180, ...
+        aparam.model, [aparam.rotations(1) param.arena_pitch aparam.rotations(3)], aparam.translations);
+    load('C:\matlabroot\G4\Arena\arena_parameters.mat');
+end
+rot180 = aparam.rot180;
 param.p_rad = p_rad;
 [param.rows, param.cols] = size(arena_x);
-
-%shift arena coordinates for arena pitch
-[arena_x, arena_y, arena_z] = rotate_coordinates(arena_x, arena_y, arena_z, [0 param.arena_pitch 0]);
-[arena_phi, arena_theta, ~] = cart2sphere(arena_x, arena_y, arena_z);
 
 %% create pattern
 switch lower(param.pattern_type(1:2))
@@ -86,6 +85,7 @@ if param.sa_mask(3)<pi
 end
 %lattitude-longitude mask
 if abs(diff(param.long_lat_mask(1:2)))<2*pi || abs(diff(param.long_lat_mask(3:4)))<pi
+    [arena_phi, arena_theta, ~] = cart2sphere(arena_x, arena_y, arena_z);
     mask = long_lat_mask(arena_phi, arena_theta, param.long_lat_mask, param.aa_samples);
     mask = repmat(mask,[1, 1, num_frames]);
     Pats = Pats.*mask + param.levels(3)*ones(size(Pats)).*(1-mask);

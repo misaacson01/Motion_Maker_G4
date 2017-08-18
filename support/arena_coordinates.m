@@ -16,7 +16,7 @@ function arena_coordinates(Psize, Pcols, Prows, Pcircle, rot180, model, rotation
 % rotations: [yaw pitch roll] rotations of arena (in radians)
 % translations: [x y z] translations of arena (for arena circumferance = 2pi)
 % 
-% saved outputs: (saved to C:\matlabroot\G4_arena\arena_parameters.mat)
+% saved outputs: (saved to C:\matlabroot\G4\Arena\arena_parameters.mat)
 % arena_x/y/z: matrices of cartesian coordinates for all pixels in the arena
 % p_rad: distance between pixels (along rows/column directions) in radians
 % arena_param: structure containing all input parameters
@@ -66,6 +66,9 @@ switch model
         arena_y = arena_y + points.*sin(-cphi);
         arena_x = repmat(arena_x,[rows 1]);
         arena_y = repmat(arena_y,[rows 1]);
+        
+    otherwise
+        error('arena model not recognized')
 end
 
 %make final adjustments to arena
@@ -75,17 +78,17 @@ arena_y = arena_y + translations(2);
 arena_z = arena_z + translations(3);
 
 %save arena coordinates and parameters
-if ~exist('C:\matlabroot\G4_arena\','dir')
-    mkdir('C:\matlabroot\G4_arena\');
+if ~exist('C:\matlabroot\G4\Arena\','dir')
+    mkdir('C:\matlabroot\G4\Arena\');
 end
-arena_param.Psize = Psize;
-arena_param.Pcols = Pcols;
-arena_param.Prows = Prows;
-arena_param.Pcircle = Pcircle;
-arena_param.rot180 = rot180;
-arena_param.model = model;
-arena_param.rotations = rotations;
-arena_param.translations = translations;
-save('C:\matlabroot\G4_arena\arena_parameters.mat','arena_x','arena_y','arena_z','p_rad','arena_param');
+aparam.Psize = Psize;
+aparam.Pcols = Pcols;
+aparam.Prows = Prows;
+aparam.Pcircle = Pcircle;
+aparam.rot180 = rot180;
+aparam.model = model;
+aparam.rotations = rotations;
+aparam.translations = translations;
+save('C:\matlabroot\G4\Arena\arena_parameters.mat','arena_x','arena_y','arena_z','p_rad','aparam');
 
 end
