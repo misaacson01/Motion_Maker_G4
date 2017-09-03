@@ -63,9 +63,18 @@ sdata.snap_dots = 0;
 s2data.enable = [0 0];
 s2data.sa_mask = [0 0 pi 0];
 s2data.long_lat_mask = [-pi pi -pi/2 pi/2 0];
+if exist('C:\matlabroot\G4\Arena\arena_parameters.mat','file')
+    load('C:\matlabroot\G4\Arena\arena_parameters.mat');
+    s3data.arena_pitch = rad2deg(aparam.rotations(2));
+    s3data.updated = 1;
+else
+    s3data.arena_pitch = 0;
+    s3data.updated = 0;
+end
 handles.tag = findobj('Tag','Motion_Maker_G4_gui');
 setappdata(handles.tag,'sdata',sdata);
 setappdata(handles.tag,'s2data',s2data);
+setappdata(handles.tag,'s3data',s3data);
 handles.loaded_pattern = 0;
 
 % This sets up the initial plot - only do when we are invisible
@@ -136,7 +145,17 @@ handles.param.dot_level = get(handles.popupmenu10, 'Value')-1;
 handles.param.pole_coord = deg2rad(str2double({get(handles.edit7, 'String'), ...
     get(handles.edit8, 'String')}));
 handles.param.motion_angle = deg2rad(str2double(get(handles.edit9, 'String')));
-handles.param.arena_pitch = deg2rad(str2double(get(handles.edit10, 'String')));
+
+%get arena configurations
+s3data = getappdata(handles.tag,'s3data');
+if s3data.updated == 1
+    handles.param.arena_pitch = deg2rad(s3data.arena_pitch);
+    s3data.updated = 0;
+    setappdata(handles.tag,'s3data',s3data);
+    set(handles.edit10, 'String', num2str(s3data.arena_pitch));
+else
+    handles.param.arena_pitch = deg2rad(str2double(get(handles.edit10, 'String')));
+end
 
 % get more options
 sdata = getappdata(handles.tag,'sdata');
