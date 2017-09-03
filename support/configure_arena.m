@@ -52,6 +52,8 @@ function configure_arena_OpeningFcn(hObject, eventdata, handles, varargin)
 % handles    structure with handles and user data (see GUIDATA)
 % varargin   command line arguments to configure_arena (see VARARGIN)
 
+handles.gui1tag = findobj('Tag','Motion_Maker_G4_gui');
+
 load('C:\matlabroot\G4\arena\arena_parameters.mat')
 set(handles.edit1, 'String',num2str(aparam.Psize));
 set(handles.edit2, 'String',num2str(aparam.Prows));
@@ -332,10 +334,14 @@ Pcircle = str2double(get(handles.edit4, 'String'));
 rot180 = get(handles.checkbox1, 'Value');
 popup_strings = {'poly', 'smooth'};
 model = popup_strings{get(handles.popupmenu1, 'Value')};
-rotations = [str2double(get(handles.edit5, 'String')) str2double(get(handles.edit6, 'String')) str2double(get(handles.edit7, 'String'))];
-translations = [str2double(get(handles.edit8, 'String')); str2double(get(handles.edit9, 'String')); str2double(get(handles.edit10, 'String'))];
+rotations = [str2double(get(handles.edit5, 'String')), str2double(get(handles.edit6, 'String')), str2double(get(handles.edit7, 'String'))];
+translations = [str2double(get(handles.edit8, 'String')), str2double(get(handles.edit9, 'String')), str2double(get(handles.edit10, 'String'))];
 
 arena_coordinates(Psize, Pcols, Prows, Pcircle, rot180, model, rotations, translations)
+
+s3data.arena_pitch = rad2deg(rotations(2));
+s3data.updated = 1;
+setappdata(handles.gui1tag,'s3data',s3data);
 
 close(gcf)
 
