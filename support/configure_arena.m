@@ -341,7 +341,9 @@ arena_coordinates(Psize, Pcols, Prows, Pcircle, rot180, model, rotations, transl
 
 s3data.arena_pitch = rad2deg(rotations(2));
 s3data.updated = 1;
-setappdata(handles.gui1tag,'s3data',s3data);
+if isempty(handles.gui1tag)==0
+    setappdata(handles.gui1tag,'s3data',s3data);
+end
 
 close(gcf)
 
