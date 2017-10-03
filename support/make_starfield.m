@@ -52,6 +52,11 @@ dots_x = rand(param.num_dots, 1)*2 - 1;
 dots_y = rand(param.num_dots, 1)*2 - 1;
 dots_z = rand(param.num_dots, 1)*2 - 1;
 
+%set starting location of single dot manually
+% dots_x = -0.25;
+% dots_y = 0;
+% dots_z = -1;
+
 % eliminate dots that overlap the arena center and that will never fall 
 % within the view radius
 actual_dot_radius = tan(param.dot_radius);
@@ -174,12 +179,22 @@ end
 %% find pixels that are close to each valid dot
 %convert pattern and dot matrices to arrays (valid dots in 3rd dim) and
 %calculate distance between pixels/dots in each dimension individually
+
+if all(size(sdots_x)==0) %fix error with only using 1 dot
+    sdots_x = [1;1]; sdots_x(sdots_x==1) = [];
+    sdots_y = [1;1]; sdots_y(sdots_y==1) = [];
+    sdots_z = [1;1]; sdots_z(sdots_z==1) = [];
+end
 dx = abs(permute(repmat(sdots_x,[1 size(pat_x)]),[2 3 1]) - repmat(pat_x,[1 1 num_vdots]));
 dy = abs(permute(repmat(sdots_y,[1 size(pat_x)]),[2 3 1]) - repmat(pat_y,[1 1 num_vdots]));
 dz = abs(permute(repmat(sdots_z,[1 size(pat_x)]),[2 3 1]) - repmat(pat_z,[1 1 num_vdots]));
 
 %valid pixels: close to a dot in all 3 dimensions individually
-dots_rad = permute(repmat(dots_rad(vdot_idx),[1 size(pat_x)]),[2 3 1]);
+vdots_rad = dots_rad(vdot_idx);
+if all(size(vdots_rad)==0) %fix error with only using 1 dot
+    vdots_rad = [1;1]; vdots_rad(vdots_rad==1) = [];
+end
+dots_rad = permute(repmat(vdots_rad,[1 size(pat_x)]),[2 3 1]);
 vpix_inds = find(dx<dots_rad+p_rad & dy<dots_rad+p_rad & dz<dots_rad+p_rad);
 
 
