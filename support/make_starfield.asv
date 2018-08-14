@@ -160,10 +160,10 @@ vdot_idx = cdots_theta<max(max(cpat_theta))+c_rad & cdots_theta>min(min(cpat_the
            & cdots_phi<max(max(cpat_phi))+c_rad & cdots_phi>min(min(cpat_phi))-c_rad;
 
 %dots that fall within the view radius
-if strncmpi(param.motion_type,'e',1)
-    vdot_idx = vdot_idx & dots_pole_dist2<=sin(dots_theta);
-else
+if strncmpi(param.motion_type,'t',1)
     vdot_idx = vdot_idx & cdots_rho<=1;
+elseif strncmpi(param.motion_type,'e',1)
+    vdot_idx = vdot_idx & dots_pole_dist2<=sin(dots_theta);
 end
 num_vdots = sum(vdot_idx); %total number of valid dots
 
