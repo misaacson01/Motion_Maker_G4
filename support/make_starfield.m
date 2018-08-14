@@ -65,8 +65,10 @@ elseif param.dot_re_random == 1 || dots_exist == 0 %re-randomize dot starting lo
     save('C:\matlabroot\G4\Arena\startfield_dots.mat','dots_x','dots_y','dots_z');
 end
 
-%rotate coordinates to match rotation of arena
-[dots_x, dots_y, dots_z] = rotate_coordinates(dots_x, dots_y, dots_z, rotations);
+%rotate coordinates to match rotation of arena (only compatible with cardinal axes rotations)
+if ~any(mod(rotations,pi/2)>0.01)
+    [dots_x, dots_y, dots_z] = rotate_coordinates(dots_x, dots_y, dots_z, rotations);
+end
 
 % eliminate dots that overlap the arena center
 actual_dot_radius = tan(param.dot_radius);
