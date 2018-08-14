@@ -22,7 +22,7 @@ function varargout = more_options(varargin)
 
 % Edit the above text to modify the response to help more_options
 
-% Last Modified by GUIDE v2.5 23-Apr-2017 11:06:12
+% Last Modified by GUIDE v2.5 14-Aug-2018 10:30:21
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -65,6 +65,7 @@ set(handles.checkbox1, 'Value', sdata.back_frame);
 set(handles.checkbox2, 'Value', sdata.flip_right);
 set(handles.checkbox3, 'Value', sdata.aa_poles); 
 set(handles.checkbox4, 'Value', sdata.snap_dots); 
+set(handles.checkbox5, 'Value', sdata.dot_re_random); 
 
 % Update handles structure
 guidata(hObject, handles);
@@ -184,7 +185,7 @@ sdata.back_frame = get(handles.checkbox1, 'Value');
 sdata.flip_right = get(handles.checkbox2, 'Value');
 sdata.aa_poles = get(handles.checkbox3, 'Value'); 
 sdata.snap_dots = get(handles.checkbox4, 'Value'); 
-
+sdata.dot_re_random = get(handles.checkbox5, 'Value'); 
 setappdata(handles.gui1tag,'sdata',sdata);
 
 close(gcf)
@@ -206,3 +207,12 @@ function checkbox4_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of checkbox4
+
+
+% --- Executes on button press in checkbox5.
+function checkbox5_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox5 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox5
