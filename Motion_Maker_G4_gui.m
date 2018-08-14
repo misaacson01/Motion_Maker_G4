@@ -60,6 +60,7 @@ sdata.phase_shift = 0;
 sdata.back_frame = 0;
 sdata.flip_right = 0;
 sdata.snap_dots = 0;
+sdata.dot_re_random = 1;
 s2data.enable = [0 0];
 s2data.sa_mask = [0 0 pi 0];
 s2data.long_lat_mask = [-pi pi -pi/2 pi/2 0];
@@ -165,6 +166,7 @@ handles.param.phase_shift = sdata.phase_shift;
 handles.param.back_frame = sdata.back_frame;
 handles.param.flip_right = sdata.flip_right;
 handles.param.snap_dots = sdata.snap_dots;
+handles.param.dot_re_random = sdata.dot_re_random;
 
 %get mask options
 if strncmpi(handles.param.pattern_fov,'f',1)
@@ -1157,6 +1159,7 @@ try
     sdata.back_frame = handles.param.back_frame;
     sdata.flip_right = handles.param.flip_right;
     sdata.snap_dots = handles.param.snap_dots;
+    sdata.dot_re_random = handles.param.dot_re_random;
     s2data.sa_mask = handles.param.sa_mask;
     s2data.long_lat_mask = handles.param.long_lat_mask;
     s2data.enable = [0 0];

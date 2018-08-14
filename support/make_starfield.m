@@ -19,6 +19,7 @@ function [Pats, num_frames, true_step_size] = make_starfield(param, arena_x, are
 % param.dot_radius: radius of each dot
 % param.dot_size: 'static' or 'distance-relative' (where closer dots appear larger)
 % param.dot_occ: how occluding dots are handled ('closest', 'sum', or 'mean')
+% param.dot_re_random: whether to re-randomize dot starting locations (1=randomize, 0=reuse previous)
 % param.snap_dots: if apparent dot locations should be rounded to the nearest pixel (1 if yes)
 % param.aa_samples: # of samples taken to calculate a single pixel's brightness
 % 
@@ -48,38 +49,48 @@ end
 
 
 %% calculate random starting coordinates of dots
-dots_x = rand(param.num_dots, 1)*2 - 1;
-dots_y = rand(param.num_dots, 1)*2 - 1;
-dots_z = rand(param.num_dots, 1)*2 - 1;
+dots_exist = 1;
+if param.dot_re_random == 0 %use previously generated dots starting locations
+    if exist('C:\matlabroot\G4\Arena\startfield_dots.mat','file')
+        % use previouslparam.dot_re_randomy generated locations of dots
+        load('C:\matlabroot\G4\Arena\startfield_dots.mat','dots_x','dots_y','dots_z');
+    else
+        dots_exist = 0;
+    end
+elseif param.dot_re_random == 1 || dots_exist == 0 %re-randomize dot starting locations
+    % generate randomized locations of dots
+    dots_x = rand(param.num_dots, 1)*2 - 1;
+    dots_y = rand(param.num_dots, 1)*2 - 1;
+    dots_z = rand(param.num_dots, 1)*2 - 1;
+    save('C:\matlabroot\G4\Arena\startfield_dots.mat','dots_x','dots_y','dots_z');
+end
 
-%set starting location of single dot manually
-% dots_x = -0.25;
-% dots_y = 0;
-% dots_z = -1;
+%rotate coordinates to match rotation of arena
+[dots_x, dots_y, dots_z] = rotate_coordinates(dots_x, dots_y, dots_z, rotations);
 
-% eliminate dots that overlap the arena center and that will never fall 
-% within the view radius
+% eliminate dots that overlap the arena center
 actual_dot_radius = tan(param.dot_radius);
 if strncmpi(param.motion_type,'t',1)
     dots_pole_dist = hypot(dots_x, dots_y);
     elim_idx = dots_pole_dist<=actual_dot_radius & dots_pole_dist>1;
-    
+
+% eliminate dots that will never fall within the view radius
 elseif strncmpi(param.motion_type,'r',1)
     [~, ~, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
     elim_idx = dots_rho<=actual_dot_radius & dots_rho>1;
-    
+
+%keep an even distribution of dots over theta for expansion-contraction
 else
     dots_pole_dist = hypot(dots_x, dots_y);
     dots_theta = (dots_z+1)*pi/2; %spread dots evenly over theta rather than z
     dots_z = -dots_pole_dist./tan(dots_theta); %recalculate z coordinates
     [~, ~, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
-    
-    %keep an even distribution of dots over theta
     elim_idx = dots_rho<=actual_dot_radius & dots_pole_dist>1;
 end
 dots_x(elim_idx) = [];
 dots_y(elim_idx) = [];
 dots_z(elim_idx) = [];
+
 dots_pole_dist2 = dots_x.^2 + dots_y.^2; %use for exp-con to maintain even pixel density
 [dots_phi, dots_theta, dots_rho] = cart2sphere(dots_x, dots_y, dots_z);
 num_dots = length(dots_x);
