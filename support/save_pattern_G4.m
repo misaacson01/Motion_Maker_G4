@@ -1,5 +1,5 @@
 function save_pattern_G4(Pats, param, save_loc, filename)
-% FUNCTION save_pattern_G4(Pats, save_loc, filename, ID_num, param)
+% FUNCTION save_pattern_G4(Pats, param, save_loc, filename)
 % 
 % Saves the Pats variable to both .mat and .pat files, the former of which
 % can be easily read back into Matlab and the latter a binary file which is
