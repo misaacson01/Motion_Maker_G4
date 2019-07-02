@@ -45,7 +45,7 @@ fprintf(FID,'%s\n',['param.num_dots = ' num2str(param.num_dots) '; %number of do
 fprintf(FID,'%s\n',['param.dot_radius = ' num2str(param.dot_radius, '%.4g') '; %radius of dots (in radians) {for starfield}']);
 fprintf(FID,'%s\n',['param.dot_size = ''' param.dot_size '''; %static or distance-relative {for starfield}']);
 fprintf(FID,'%s\n',['param.dot_occ = ''' param.dot_occ '''; %how occluding dots are drawn (closest, sum, or mean) {for starfield}']);
-fprintf(FID,'%s\n',['param.dot_re_random = ''' param.re-random '''; %whether to re-randomize dot starting locations (1=randomize, 0=reuse previous) {for startfield}']);
+fprintf(FID,'%s\n',['param.dot_re_random = ' num2str(1) '; %whether to re-randomize dot starting locations (1=randomize, 0=reuse previous) {for startfield}']);
 fprintf(FID,'%s\n',['param.dot_level = ' num2str(param.dot_level) '; %0 = dot brightness set to 1st level; 1 and 2 = random brightness (0-1st; 0 or 1st) {for starfield}']);
 fprintf(FID,'%s\n',['param.snap_dots = ' num2str(param.snap_dots) '; %1 if apparent dot locations should be rounded to the nearest pixel {for starfield}']);
 fprintf(FID,'%s\n',['param.sa_mask = [' num2str(param.sa_mask, ' %.3g') ']; %location, size, and direction of solid angle mask [longitude, lattitude, solid_angle, out/in]']);
