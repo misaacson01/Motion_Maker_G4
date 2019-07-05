@@ -228,8 +228,12 @@ else
 end
 set(handles.edit15,'String',handles.patName);
 
-
+%update pattern
 set(handles.pushbutton1,'String','Update Pattern')
+
+%set plot visualization
+popupmenu6_Callback(handles.popupmenu6, eventdata, handles);
+
 guidata(hObject, handles);
 
 
@@ -771,6 +775,15 @@ function popupmenu6_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns popupmenu6 contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from popupmenu6
 handles.plot_type = get(hObject, 'Value');
+if handles.plot_type == 1
+        strings = {'on' 'off'};
+else
+        strings = {'off' 'on'};
+end
+set(handles.text37,'visible',strings{1})
+set(handles.text38,'visible',strings{2})
+set(handles.text39,'visible',strings{1})
+set(handles.text40,'visible',strings{2})
 arena_projection(handles.Pats, handles.param.gs_val, handles.plot_type, handles.cur_frame);
 guidata(hObject, handles);
 
