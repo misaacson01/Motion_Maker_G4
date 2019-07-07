@@ -25,19 +25,26 @@ else
     disp('could not save binary .pat file; missing script from PControl');
 end
 
-%save the mat file
+%create save directory if it doesn't exist
 if ~exist(save_loc,'dir')
     mkdir(save_loc)
 end
-matFileName = fullfile(save_loc, filename);
+
+%create file name strings
+matFileName = fullfile(save_loc, [filename '_' num2str(param.ID,'%04d') '_G4.mat']);
 if exist(matFileName,'file')
-    error('pattern already exists in save folder with that name')
+    error('pattern .mat file already exists in save folder with that name')
 end
+patFileName = fullfile(save_loc, [num2str(param.ID,'%04d') '.pat']);
+if exist(patFileName,'file')
+    error('pattern .pat file already exists in save folder with that name')
+end
+    
+%save pattern .mat file
 save(matFileName, 'pattern');
 
 %save the corresponding binary pat file
 if exist('make_pattern_vector_g4','file')
-    patFileName = fullfile(save_loc, [num2str(param.ID,'%04d') '.pat']);
     fileID = fopen(patFileName,'w');
     fwrite(fileID, pattern.data);
     fclose(fileID);

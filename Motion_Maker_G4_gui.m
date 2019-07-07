@@ -217,16 +217,10 @@ else
     if ~exist(handles.save_dir,'dir')
         mkdir(handles.save_dir)
     end
-    cd(handles.save_dir);
-    patfiles = ls('Pattern*.mat');
-    if isempty(patfiles)
-        handles.param.ID = 1;
-    else
-        handles.param.ID = size(patfiles,1)+1;
-    end
-    handles.patName = ['Pattern_' num2str(handles.param.ID, '%04d') '_G4.mat']; 
+    
+    handles.param.ID = get_pattern_ID(handles.save_dir);
 end
-set(handles.edit15,'String',handles.patName);
+set(handles.text41,'String',['_' num2str(handles.param.ID,'%04d') '.mat']);
 
 %update pattern
 set(handles.pushbutton1,'String','Update Pattern')
@@ -840,18 +834,12 @@ function pushbutton4_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-save_dir = uigetdir('', 'Pick a Directory');
-set(handles.text26,'String',save_dir);
-cd(handles.save_dir);
-%set pattern name
-patfiles = ls('Pattern*.mat');
-if isempty(patfiles)
-    handles.param.ID = 1;
-else
-    handles.param.ID = size(patfiles,1)+1;
-end
-handles.patName = ['Pattern_' num2str(handles.param.ID, '%04d') '_G4.mat'];
-set(handles.edit15,'String',handles.patName);
+handles.save_dir = uigetdir('', 'Pick a Directory');
+set(handles.text26,'String',handles.save_dir);
+
+%set pattern ID
+handles.param.ID = get_pattern_ID(handles.save_dir);
+set(handles.text41,'String',['_' num2str(handles.param.ID,'%04d') '.mat']);
 guidata(hObject, handles);
 
 
@@ -863,7 +851,7 @@ function pushbutton5_Callback(hObject, eventdata, handles)
 handles.save_dir = get(handles.text26,'String');
 handles.patName = get(handles.edit15,'String');
 
-%save .mat and .pat file-s
+%save .mat and .pat files
 save_pattern_G4(handles.Pats, handles.param, handles.save_dir, handles.patName)
 
 
@@ -1128,9 +1116,10 @@ function pushbutton10_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[handles.patName, handles.save_dir] = uigetfile('Pattern*.mat');
-
-load(fullfile(handles.save_dir,handles.patName));
+[filename, handles.save_dir] = uigetfile('Pattern*.mat');
+load(fullfile(handles.save_dir,filename));
+handles.param.ID = str2double(filename(end-10:end-7)); %get ID
+handles.patName = filename(1:end-11); %remove ID and filetype from name
 
 try 
     handles.param = pattern.param;
@@ -1204,6 +1193,7 @@ catch
     set(handles.edit16,'String',num2str(handles.cur_frame));
     set(handles.text24,'String',num2str(handles.num_frames));
     set(handles.edit15,'String',handles.patName);
+    set(handles.text41,'String',num2str(handles.param.ID));
     set(handles.popupmenu6, 'Value', handles.plot_type);
     
     guidata(hObject, handles);

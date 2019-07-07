@@ -64,14 +64,8 @@ fprintf(FID,'%s\n','');
 fprintf(FID,'%s\n','');
 fprintf(FID,'%s\n','%% save pattern');
 fprintf(FID,'%s\n','save_dir = ''C:\matlabroot\G4\Patterns\'';');
-fprintf(FID,'%s\n','cd(save_dir);');
-fprintf(FID,'%s\n','patfiles = ls(''Pattern*.mat'');');
-fprintf(FID,'%s\n','if isempty(patfiles)');
-fprintf(FID,'%s\n','    param.ID = 1;');
-fprintf(FID,'%s\n','else');
-fprintf(FID,'%s\n','    param.ID = size(patfiles,1)+1;');
-fprintf(FID,'%s\n','end');
-fprintf(FID,'%s\n','patName = [''Pattern_'' num2str(param.ID, ''%04d'') ''_G4.mat''];');
+fprintf(FID,'%s\n','patName = ''Pattern'';');
+fprintf(FID,'%s\n','param.ID = get_pattern_ID(save_dir);');
 fprintf(FID,'%s\n','save_pattern_G4(Pats, param, save_dir, patName);');
 fprintf(FID,'%s\n','');
 
