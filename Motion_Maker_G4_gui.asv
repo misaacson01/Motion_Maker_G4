@@ -187,8 +187,12 @@ else
     handles.param.long_lat_mask = deg2rad([-180 180 -90 90 0]);
 end
 
-%generate pattern
-[handles.Pats, handles.param.true_step_size, handles.param.rot180] = Motion_Maker_G4(handles.param);
+%generate pattern (keep old Pats variable if loading from file)
+if handles.loaded_pattern
+    [~, handles.param.true_step_size, handles.param.rot180] = Motion_Maker_G4(handles.param);
+else
+    [handles.Pats, handles.param.true_step_size, handles.param.rot180] = Motion_Maker_G4(handles.param);
+end
 handles.num_frames = size(handles.Pats,3);
 handles.param.stretch = ones(handles.num_frames,1);
 
@@ -1177,7 +1181,7 @@ try
     %check if Pattern is same size as current arena
     load('C:\matlabroot\G4\Arena\arena_parameters.mat','arena_x');
     if numel(arena_x)~=numel(handles.Pats(:,:,1))
-        disp('warning: loaded pattern was made for a differently-sized arena')
+        disp('warning: loaded pattern was made for a differently sized arena')
     end
     
     pushbutton1_Callback(hObject, eventdata, handles);
