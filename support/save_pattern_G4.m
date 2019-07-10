@@ -1,4 +1,4 @@
-function save_pattern_G4(Pats, param, save_loc, filename)
+function save_pattern_G4(Pats, param, save_dir, filename)
 % FUNCTION save_pattern_G4(Pats, param, save_loc, filename)
 % 
 % Saves the Pats variable to both .mat and .pat files, the former of which
@@ -26,16 +26,16 @@ else
 end
 
 %create save directory if it doesn't exist
-if ~exist(save_loc,'dir')
-    mkdir(save_loc)
+if ~exist(save_dir,'dir')
+    mkdir(save_dir)
 end
 
 %create file name strings
-matFileName = fullfile(save_loc, [filename '_' num2str(param.ID,'%04d') '_G4.mat']);
+matFileName = fullfile(save_dir, [filename '_' num2str(param.ID,'%04d') '_G4.mat']);
 if exist(matFileName,'file')
     error('pattern .mat file already exists in save folder with that name')
 end
-patFileName = fullfile(save_loc, [num2str(param.ID,'%04d') '.pat']);
+patFileName = fullfile(save_dir, [num2str(param.ID,'%04d') '.pat']);
 if exist(patFileName,'file')
     error('pattern .pat file already exists in save folder with that name')
 end
