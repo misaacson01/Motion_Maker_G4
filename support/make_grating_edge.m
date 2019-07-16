@@ -53,8 +53,8 @@ end
 
 
 %take numerous samples for each pixel's field-of-view
-coord = samples_by_diff(coord, param.aa_samples); 
-
+% coord = samples_by_diff(coord, param.aa_samples); 
+coord = samples_by_p_rad(coord, param.aa_samples); 
 
 %calculate number of frames needed to create pattern (must be at least 1)
 num_frames = max([1 round(param.spat_freq/param.step_size)]); 

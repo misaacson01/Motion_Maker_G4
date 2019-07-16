@@ -216,7 +216,7 @@ else
     
     handles.param.ID = get_pattern_ID(handles.save_dir);
 end
-set(handles.text41,'String',['_' num2str(handles.param.ID,'%04d') '.mat']);
+set(handles.text41,'String',[num2str(handles.param.ID,'%04d') '_']);
 
 %update pattern
 set(handles.pushbutton1,'String','Update Pattern')
@@ -835,7 +835,7 @@ set(handles.text26,'String',handles.save_dir);
 
 %set pattern ID
 handles.param.ID = get_pattern_ID(handles.save_dir);
-set(handles.text41,'String',['_' num2str(handles.param.ID,'%04d') '.mat']);
+set(handles.text41,'String',[num2str(handles.param.ID,'%04d') '_']);
 guidata(hObject, handles);
 
 
@@ -1197,7 +1197,7 @@ catch
     set(handles.edit16,'String',num2str(handles.cur_frame));
     set(handles.text24,'String',num2str(handles.num_frames));
     set(handles.edit15,'String',handles.patName);
-    set(handles.text41,'String',num2str(handles.param.ID));
+    set(handles.text41,'String',[num2str(handles.param.ID,'%04d') '_']);
     set(handles.popupmenu6, 'Value', handles.plot_type);
     
     guidata(hObject, handles);
